@@ -4,6 +4,7 @@ All monetary fields use float for JSON compatibility (backed by Numeric in the D
 """
 
 from datetime import datetime
+from enum import Enum
 from typing import List, Optional
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
@@ -79,6 +80,17 @@ class CustomerOut(CustomerBase):
 #  ORDER
 # ══════════════════════════════════════════════════════════════════════════════
 
+class OrderStatus(str, Enum):
+    pending = "pending"
+    processing = "processing"
+    shipped = "shipped"
+    delivered = "delivered"
+
+
+class OrderStatusUpdate(BaseModel):
+    status: OrderStatus
+
+
 class OrderItemCreate(BaseModel):
     product_id: int
     quantity: int = Field(..., gt=0)
@@ -145,8 +157,21 @@ class OrderListOut(BaseModel):
 #  DASHBOARD
 # ══════════════════════════════════════════════════════════════════════════════
 
+class TopProductBrief(BaseModel):
+    name: str
+    total_quantity_sold: int
+
+
+class OrdersPerDayBrief(BaseModel):
+    date: str
+    count: int
+
+
 class DashboardStats(BaseModel):
     total_products: int
     total_customers: int
     total_orders: int
     low_stock_products: List[ProductBrief]
+    top_products: List[TopProductBrief]
+    orders_per_day: List[OrdersPerDayBrief]
+    total_revenue: float

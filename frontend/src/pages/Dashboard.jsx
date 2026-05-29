@@ -1,4 +1,6 @@
+// c:\Users\anujc\Downloads\inventory-management-system\frontend\src\pages\Dashboard.jsx
 import React, { useState, useEffect } from 'react';
+import { ResponsiveContainer, BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip } from 'recharts';
 import api from '../api/client';
 
 export default function Dashboard({ toast }) {
@@ -32,7 +34,7 @@ export default function Dashboard({ toast }) {
       </div>
 
       {/* Stat cards */}
-      <div className="stats-grid">
+      <div className="stats-grid" style={{ marginBottom: '1.5rem' }}>
         <div className="card stat-card">
           <div className="stat-icon purple">📦</div>
           <div className="stat-value">{stats.total_products}</div>
@@ -47,6 +49,66 @@ export default function Dashboard({ toast }) {
           <div className="stat-icon blue">📋</div>
           <div className="stat-value">{stats.total_orders}</div>
           <div className="stat-label">Total Orders</div>
+        </div>
+        <div className="card stat-card">
+          <div className="stat-icon orange">💰</div>
+          <div className="stat-value">
+            ${stats.total_revenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </div>
+          <div className="stat-label">Total Revenue</div>
+        </div>
+      </div>
+
+      {/* Charts section */}
+      <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', marginBottom: '1.5rem' }}>
+        <div className="card">
+          <h3 style={{ marginBottom: '1rem', fontSize: '1rem', fontWeight: 600 }}>Top 5 Selling Products</h3>
+          <div style={{ width: '100%', height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {stats.top_products.length === 0 ? (
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No product sales data yet</div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.top_products} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
+                  <XAxis dataKey="name" stroke="var(--text-secondary)" fontSize={11} tickLine={false} />
+                  <YAxis stroke="var(--text-secondary)" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      background: 'var(--bg-tertiary)', 
+                      border: '1px solid var(--border)', 
+                      borderRadius: 'var(--radius-sm)',
+                      color: 'var(--text-primary)'
+                    }} 
+                  />
+                  <Bar dataKey="total_quantity_sold" fill="var(--accent)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
+
+        <div className="card">
+          <h3 style={{ marginBottom: '1rem', fontSize: '1rem', fontWeight: 600 }}>Orders Per Day (Last 7 Days)</h3>
+          <div style={{ width: '100%', height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {stats.total_orders === 0 ? (
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No orders placed yet</div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={stats.orders_per_day} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
+                  <XAxis dataKey="date" stroke="var(--text-secondary)" fontSize={11} tickLine={false} />
+                  <YAxis stroke="var(--text-secondary)" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      background: 'var(--bg-tertiary)', 
+                      border: '1px solid var(--border)', 
+                      borderRadius: 'var(--radius-sm)',
+                      color: 'var(--text-primary)'
+                    }} 
+                  />
+                  <Line type="monotone" dataKey="count" stroke="var(--success)" strokeWidth={3} dot={{ fill: 'var(--success)', r: 4 }} activeDot={{ r: 6 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
+          </div>
         </div>
       </div>
 

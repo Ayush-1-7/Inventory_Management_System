@@ -1,3 +1,4 @@
+// c:\Users\anujc\Downloads\inventory-management-system\frontend\src\pages\Customers.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api/client';
 import CustomerForm from '../components/CustomerForm';
@@ -6,6 +7,7 @@ export default function Customers({ toast }) {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchCustomers = useCallback(() => {
     api
@@ -35,6 +37,11 @@ export default function Customers({ toast }) {
     }
   };
 
+  const filteredCustomers = customers.filter((c) => {
+    const q = searchQuery.toLowerCase();
+    return c.full_name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q);
+  });
+
   if (loading) return <div className="loading"><div className="spinner" /></div>;
 
   return (
@@ -47,9 +54,27 @@ export default function Customers({ toast }) {
       <div className="table-card">
         <div className="table-toolbar">
           <h2>All Customers ({customers.length})</h2>
-          <button id="add-customer-btn" className="btn btn-primary" onClick={() => setShowForm(true)}>
-            + Add Customer
-          </button>
+          <div className="flex items-center gap-md">
+            <input
+              type="text"
+              placeholder="Search name or email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                width: '200px',
+                padding: '0.35rem 0.75rem',
+                background: 'var(--bg-input)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)',
+                color: 'var(--text-primary)',
+                outline: 'none',
+                fontSize: '0.8rem'
+              }}
+            />
+            <button id="add-customer-btn" className="btn btn-primary btn-sm" onClick={() => setShowForm(true)}>
+              + Add Customer
+            </button>
+          </div>
         </div>
 
         {customers.length === 0 ? (
@@ -59,36 +84,45 @@ export default function Customers({ toast }) {
             <button className="btn btn-primary" onClick={() => setShowForm(true)}>+ Add Customer</button>
           </div>
         ) : (
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Full Name</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Joined</th>
-                  <th style={{ textAlign: 'right' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {customers.map((c) => (
-                  <tr key={c.id}>
-                    <td style={{ fontWeight: 500 }}>{c.full_name}</td>
-                    <td>{c.email}</td>
-                    <td>{c.phone || <span style={{ color: 'var(--text-muted)' }}>—</span>}</td>
-                    <td style={{ color: 'var(--text-secondary)' }}>
-                      {new Date(c.created_at).toLocaleDateString()}
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <button className="btn btn-danger btn-sm" onClick={() => handleDelete(c.id)}>
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <>
+            {filteredCustomers.length === 0 ? (
+              <div className="empty">
+                <h3>No matching customers found</h3>
+                <p>Try adjusting your search query.</p>
+              </div>
+            ) : (
+              <div className="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Full Name</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Joined</th>
+                      <th style={{ textAlign: 'right' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredCustomers.map((c) => (
+                      <tr key={c.id}>
+                        <td style={{ fontWeight: 500 }}>{c.full_name}</td>
+                        <td>{c.email}</td>
+                        <td>{c.phone || <span style={{ color: 'var(--text-muted)' }}>—</span>}</td>
+                        <td style={{ color: 'var(--text-secondary)' }}>
+                          {new Date(c.created_at).toLocaleDateString()}
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <button className="btn btn-danger btn-sm" onClick={() => handleDelete(c.id)}>
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
         )}
       </div>
 

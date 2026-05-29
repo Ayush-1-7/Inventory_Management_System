@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from ..database import get_db
 from ..models import Customer, Order, OrderItem, Product
-from ..schemas import OrderCreate, OrderListOut, OrderOut
+from ..schemas import OrderCreate, OrderListOut, OrderOut, OrderStatusUpdate
 
 router = APIRouter()
 
@@ -155,6 +155,18 @@ def list_orders(db: Session = Depends(get_db)):
         .all()
     )
     return [_serialize_order_list(o) for o in orders]
+
+
+@router.patch("/{order_id}/status", response_model=OrderOut)
+def update_order_status(
+    order_id: int, data: OrderStatusUpdate, db: Session = Depends(get_db)
+):
+    """Update order status (allowed: pending, processing, shipped, delivered)."""
+    order = _load_order(db, order_id)
+    order.status = data.status.value
+    db.commit()
+    db.refresh(order)
+    return _serialize_order_detail(order)
 
 
 @router.get("/{order_id}", response_model=OrderOut)

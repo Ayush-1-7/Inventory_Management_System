@@ -456,3 +456,9 @@ tbody tr:last-child td { border-bottom: none; }
   background: var(--danger-bg); border: 1px solid rgba(248,113,113,0.2);
   color: var(--danger); font-size: 0.82rem; margin-bottom: 1rem;
 }
+
+/* Force dark theme for dropdown lists */
+select option {
+  background-color: #111125 !important;
+  color: #ededf4 !important;
+}
