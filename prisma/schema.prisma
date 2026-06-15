@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  sku         String   @unique
+  description String?  @db.Text
+  category    String?
+  unit        String   @default("pcs")
+  price       Float    @default(0)
+  reorderAt   Int      @default(0)
+  imageUrl    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  movements StockMovement[]
+
+  @@index([category])
+  @@index([isActive])
+  @@index([name])
+}
+
+enum MovementType {
+  IN
+  OUT
+  ADJUSTMENT
+}
+
+model StockMovement {
+  id        String       @id @default(cuid())
+  productId String
+  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  type      MovementType @default(IN)
+  quantity  Int
+  reason    String
+  reference String?
+  createdAt DateTime     @default(now())
+
+  @@index([productId, createdAt])
+  @@index([type])
+  @@index([createdAt])
+}
